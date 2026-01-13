@@ -1,0 +1,3 @@
+python train.py -n chair-kpr200-gn-p1_base-no-ft --num_gpus 2 --head avg --batch_size 128 --label_in_use 4 --use_kpr --use_gn --log_freq 6 --vnt_not_use_ft --cross_p 1 --num_epochs 3000
+python train.py -n car-kpr200-gn-p1_base-no-ft --num_gpus 2 --head avg --batch_size 128 --label_in_use 3 --use_kpr --use_gn --log_freq 6 --vnt_not_use_ft --cross_p 1 --num_epochs 3000
+python train.py -n table-kpr200-gn-p1_base-no-ft --num_gpus 2 --head avg --batch_size 128 --label_in_use 10 --use_kpr --use_gn --log_freq 6 --vnt_not_use_ft --cross_p 1 --num_epochs 3000

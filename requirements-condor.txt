@@ -1,0 +1,11 @@
+pytorch-lightning==1.8.2
+open3d
+tqdm
+wandb
+numpy
+scipy
+h5py
+pytorch3d
+
+omegaconf
+seaborn

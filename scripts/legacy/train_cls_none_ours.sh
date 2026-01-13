@@ -1,0 +1,2 @@
+python train_cls.py --log_dir 'ours-v2/aligned' --rot 'aligned' --wandb_name 'cls_ours-v2_aligned' --align_model_ckpt logs/multi_ours-v2/best.ckpt
+python train_cls.py --log_dir 'ours-v2/so3' --rot 'so3' --wandb_name 'cls_ours-v2_so3' --align_model_ckpt logs/multi_ours-v2/best.ckpt
