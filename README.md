@@ -56,8 +56,6 @@ Checkpoints and logs are saved to `logs/`.
 uv run python src/eval.py ckpt_path=logs/.../best.ckpt
 ```
 
-Metrics reported: **consistency** (cross-instance angular std) and **stability** (within-instance angular std), per class and averaged.
-
 ## Acknowledgments
 
 This project builds upon [Vector Neurons](https://github.com/FlyingGiraworffe/vnn) for SO(3)-equivariant layers and [Canonical Capsules](https://github.com/canonical-capsules/canonical-capsules) for ShapeNet data processing. The codebase structure follows [lightning-hydra-template](https://github.com/ashleve/lightning-hydra-template).
