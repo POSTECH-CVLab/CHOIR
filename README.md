@@ -1,4 +1,4 @@
-## `CHOIR`: `CH`aracteristic `O`rientation Predictor with `I`nvariant `R`esidual Learning
+### `CHOIR`: `CH`aracteristic `O`rientation with `I`nvariant `R`esidual Learning
 
 > [Stable and Consistent Prediction of 3D Characteristic Orientation via Invariant Residual Learning](https://arxiv.org/abs/2306.07547)\
 > [Seungwook Kim<sup>1*</sup>](https://wookiekim.github.io/),
