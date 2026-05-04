@@ -41,13 +41,9 @@ def train(cfg: DictConfig) -> None:
     # Train
     trainer.fit(model=model, datamodule=datamodule)
 
-    # Test after training
+    # Test after training (use current in-memory weights)
     if cfg.get("test_after_training"):
-        ckpt_path = trainer.checkpoint_callback.best_model_path
-        if ckpt_path:
-            trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
-        else:
-            trainer.test(model=model, datamodule=datamodule)
+        trainer.test(model=model, datamodule=datamodule)
 
 
 @hydra.main(version_base="1.3", config_path="../configs", config_name="train")

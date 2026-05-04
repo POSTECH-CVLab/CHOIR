@@ -30,8 +30,10 @@ class CHOIRModule(L.LightningModule):
         scheduler_interval: str = "epoch",
     ):
         super().__init__()
-        self.save_hyperparameters(ignore=["net"], logger=False)
+        self.save_hyperparameters(ignore=["net", "optimizer", "scheduler"], logger=False)
         self.net = net
+        self.optimizer_cfg = optimizer
+        self.scheduler_cfg = scheduler
         self.criterion = RotationMSELoss()
 
     def setup(self, stage: str | None = None) -> None:
@@ -49,14 +51,18 @@ class CHOIRModule(L.LightningModule):
         return self.net(pcd)
 
     def configure_optimizers(self) -> dict[str, Any]:
-        optimizer = hydra.utils.instantiate(self.hparams.optimizer, params=self.parameters())
+        if callable(self.optimizer_cfg):
+            optimizer = self.optimizer_cfg(params=self.parameters())
+        else:
+            optimizer = hydra.utils.instantiate(self.optimizer_cfg, params=self.parameters())
 
         result: dict[str, Any] = {"optimizer": optimizer}
 
-        if self.hparams.scheduler is not None:
-            scheduler = hydra.utils.instantiate(
-                self.hparams.scheduler, optimizer=optimizer
-            )
+        if self.scheduler_cfg is not None:
+            if callable(self.scheduler_cfg):
+                scheduler = self.scheduler_cfg(optimizer=optimizer)
+            else:
+                scheduler = hydra.utils.instantiate(self.scheduler_cfg, optimizer=optimizer)
             result["lr_scheduler"] = {
                 "scheduler": scheduler,
                 "interval": self.hparams.scheduler_interval,
