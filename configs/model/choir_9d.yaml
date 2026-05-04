@@ -1,0 +1,40 @@
+# @package _global_
+
+# CHOIR with 9D rotation representation (raw 3x3 matrix + SVD at inference).
+# Reference: Choy et al., "Deep Global Registration", CVPR 2020.
+
+model:
+  _target_: src.models.lightning_modules.choir_module.CHOIRModule
+
+  optimizer: ${optim}
+  scheduler: ${scheduler}
+  scheduler_interval: epoch
+
+  net:
+    _target_: src.models.networks.choir.CHOIR
+    hypothesizer:
+      _target_: src.models.networks.hypothesizer.OrientationHypothesizer
+      encoder:
+        _target_: src.models.networks.encoder.EquivariantEncoder
+        k: 40
+        pooling: mean
+        base_ch: 64
+        nlatent: 1020
+        feature_transform: false
+        which_norm_VNT: norm
+      rotation_predictor:
+        _target_: src.models.networks.hypothesizer.EquivariantRotationPredictor
+        in_channels: 170
+        rotation_repr: "9d"
+      invariant_feature_extractor:
+        _target_: src.models.networks.vn_layers.VNStdFeature
+        in_channels: 340
+        dim: 4
+        normalize_frame: false
+        negative_slope: 0.0
+    residual_predictor:
+      _target_: src.models.networks.residual_predictor.ResidualPredictor
+      in_channels: 340
+      mid_channels: 64
+      num_blocks: 4
+      rotation_repr: "9d"

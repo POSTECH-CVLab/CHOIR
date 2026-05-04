@@ -6,25 +6,34 @@ h = ψ ∘ φ, where:
   VR (VNStdFeature): extracts SO(3)-invariant features for the residual predictor.
 """
 
+from typing import Literal
+
 import torch
 import torch.nn as nn
 
 from src.models.networks.vn_layers import VNLinear, VNBatchNorm
-from src.utils.rotation import ortho2rotation
+from src.utils.rotation import ortho2rotation, project_to_rotation
 
 
 class EquivariantRotationPredictor(nn.Module):
     """ψ: Predicts rotation matrix from SO(3)-equivariant features.
 
-    Projects equivariant features to a 2-vector basis, applies global average pooling,
-    and orthonormalizes to produce a valid rotation matrix.
+    Supports two rotation representations:
+      - "6d": 2-vector basis → Gram-Schmidt orthonormalization (Zhou et al., 2019)
+      - "9d": 3-vector basis → raw 3x3 matrix, SVD projection at inference (Choy et al., 2020)
     """
 
-    def __init__(self, in_channels: int):
+    def __init__(
+        self,
+        in_channels: int,
+        rotation_repr: Literal["6d", "9d"] = "6d",
+    ):
         super().__init__()
+        self.rotation_repr = rotation_repr
+        out_vectors = 2 if rotation_repr == "6d" else 3
         self.to_basis = nn.Sequential(
-            VNLinear(in_channels, 2),
-            VNBatchNorm(2, dim=4),
+            VNLinear(in_channels, out_vectors),
+            VNBatchNorm(out_vectors, dim=4),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -35,10 +44,18 @@ class EquivariantRotationPredictor(nn.Module):
         Returns:
             (B, 3, 3) predicted rotation matrix.
         """
-        x = self.to_basis(x)  # (B, 2, 3, N)
-        x = x.permute(0, 3, 1, 2)  # (B, N, 2, 3)
-        global_feat = x.mean(dim=1)  # (B, 2, 3)
-        return ortho2rotation(global_feat)
+        x = self.to_basis(x)  # (B, 2or3, 3, N)
+        x = x.permute(0, 3, 1, 2)  # (B, N, 2or3, 3)
+        global_feat = x.mean(dim=1)  # (B, 2or3, 3)
+
+        if self.rotation_repr == "6d":
+            return ortho2rotation(global_feat)
+        else:
+            # 9d: raw 3x3, SVD projection only at inference
+            mat = global_feat  # (B, 3, 3)
+            if not self.training:
+                mat = project_to_rotation(mat)
+            return mat
 
 
 class OrientationHypothesizer(nn.Module):

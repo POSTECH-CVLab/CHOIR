@@ -5,13 +5,15 @@ processes them through Point Transformer blocks, and predicts a
 residual rotation to refine the orientation hypothesis.
 """
 
+from typing import Literal
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from src.models.networks.vn_layers import knn
 from src.models.networks.point_transformer import PointTransformerBlock
-from src.utils.rotation import ortho2rotation
+from src.utils.rotation import ortho2rotation, project_to_rotation
 
 
 class _GeMPool(nn.Module):
@@ -32,8 +34,16 @@ class ResidualPredictor(nn.Module):
     Architecture: Conv1d → PointTransformerBlocks → GeMPool → MLP → ortho2rotation.
     """
 
-    def __init__(self, in_channels: int, mid_channels: int = 64, num_blocks: int = 4):
+    def __init__(
+        self,
+        in_channels: int,
+        mid_channels: int = 64,
+        num_blocks: int = 4,
+        rotation_repr: Literal["6d", "9d"] = "6d",
+    ):
         super().__init__()
+        self.rotation_repr = rotation_repr
+        out_dim = 6 if rotation_repr == "6d" else 9
 
         self.pre_transformer = nn.Sequential(
             nn.Conv1d(in_channels * 3, mid_channels, kernel_size=1, bias=False),
@@ -47,7 +57,7 @@ class ResidualPredictor(nn.Module):
             nn.Linear(mid_channels, mid_channels, bias=False),
             nn.BatchNorm1d(mid_channels),
             nn.ReLU(True),
-            nn.Linear(mid_channels, 6),
+            nn.Linear(mid_channels, out_dim),
         )
         self.gem_pool = _GeMPool()
 
@@ -71,5 +81,12 @@ class ResidualPredictor(nn.Module):
             x = block(x, p, knn_idx)
 
         global_feat = self.gem_pool(x).squeeze(-1)  # (B, mid_channels)
-        out = self.final(global_feat)  # (B, 6)
-        return ortho2rotation(out.view(-1, 2, 3))
+        out = self.final(global_feat)
+
+        if self.rotation_repr == "6d":
+            return ortho2rotation(out.view(-1, 2, 3))
+        else:
+            mat = out.view(-1, 3, 3)
+            if not self.training:
+                mat = project_to_rotation(mat)
+            return mat

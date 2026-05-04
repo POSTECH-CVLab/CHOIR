@@ -42,6 +42,27 @@ def ortho2rotation(poses: torch.Tensor) -> torch.Tensor:
     return torch.cat((x[:, :, None], y[:, :, None], z[:, :, None]), dim=2)
 
 
+def project_to_rotation(mat: torch.Tensor) -> torch.Tensor:
+    """Project a batch of 3x3 matrices to the nearest rotation matrices (SVD).
+
+    Args:
+        mat: (B, 3, 3) matrices.
+
+    Returns:
+        (B, 3, 3) rotation matrices with det = +1.
+    """
+    U, _, Vh = torch.linalg.svd(mat)
+    R = U @ Vh
+    # Fix reflections (det = -1)
+    det = torch.det(R)
+    sign = torch.ones_like(det)
+    sign[det < 0] = -1
+    correction = torch.diag_embed(
+        torch.stack([torch.ones_like(sign), torch.ones_like(sign), sign], dim=-1)
+    )
+    return U @ correction @ Vh
+
+
 def find_the_closest_rotation(mat: torch.Tensor) -> torch.Tensor:
     """Project a matrix to the closest rotation matrix (L2 Chordal distance).
 
