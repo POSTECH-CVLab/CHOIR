@@ -60,7 +60,7 @@ Metrics reported: **consistency** (cross-instance angular std) and **stability**
 
 ## Acknowledgments
 
-This project builds upon [Vector Neurons](https://github.com/FlyingGiraworffe/vnn) for SO(3)-equivariant layers, [VN-SPD](https://github.com/orenkatzir/VN-SPD) for the Vector Neuron with Translation (VNT) backbone, and [Canonical Capsules](https://github.com/canonical-capsules/canonical-capsules) for ShapeNet data processing. The codebase structure follows [lightning-hydra-template](https://github.com/ashleve/lightning-hydra-template).
+This project builds upon [Vector Neurons](https://github.com/FlyingGiraworffe/vnn) for SO(3)-equivariant layers and [Canonical Capsules](https://github.com/canonical-capsules/canonical-capsules) for ShapeNet data processing. The codebase structure follows [lightning-hydra-template](https://github.com/ashleve/lightning-hydra-template).
 
 ## Citation
 
