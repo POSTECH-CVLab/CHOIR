@@ -133,8 +133,9 @@ def download_shapenet(data_dir: str) -> str:
         print(f"Downloading ShapeNet from {DOWNLOAD_URL} ...")
         print("(~12GB, supports resume on failure)")
 
-        max_retries = 10
-        for attempt in range(1, max_retries + 1):
+        attempt = 0
+        while True:
+            attempt += 1
             try:
                 # Resume from partial download
                 existing_size = os.path.getsize(zip_part) if os.path.exists(zip_part) else 0
@@ -185,17 +186,10 @@ def download_shapenet(data_dir: str) -> str:
                 break
 
             except (urllib.error.URLError, IOError, TimeoutError, ConnectionError) as e:
-                print(f"\n  Attempt {attempt}/{max_retries} failed: {e}")
-                if attempt < max_retries:
-                    wait = min(30, 5 * attempt)
-                    print(f"  Retrying in {wait}s...")
-                    time.sleep(wait)
-                else:
-                    raise RuntimeError(
-                        f"Failed to download after {max_retries} attempts. "
-                        f"Partial file saved at {zip_part}. "
-                        f"Re-run to resume, or download manually from {DOWNLOAD_URL}"
-                    )
+                wait = min(60, 5 * attempt)
+                print(f"\n  Attempt {attempt} failed: {e}")
+                print(f"  Retrying in {wait}s...")
+                time.sleep(wait)
 
     # Extract
     print(f"Extracting to {raw_dir} ...")
