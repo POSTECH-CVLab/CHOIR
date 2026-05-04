@@ -1,0 +1,15 @@
+# @package _global_
+
+# Multi-class: airplane, car, chair, table
+# Usage: uv run python src/train.py experiment=multi
+
+defaults:
+  - override /data: shapenet
+  - override /model: choir
+  - override /trainer: ddp
+
+data:
+  label_in_use: "0,3,4,10"
+
+trainer:
+  max_epochs: 3000

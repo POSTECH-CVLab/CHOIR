@@ -1,0 +1,15 @@
+# @package _global_
+
+# Single-class: airplane
+# Usage: uv run python src/train.py experiment=airplane
+
+defaults:
+  - override /data: shapenet
+  - override /model: choir
+  - override /trainer: ddp
+
+data:
+  label_in_use: "0"
+
+trainer:
+  max_epochs: 3000

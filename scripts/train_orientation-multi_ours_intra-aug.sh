@@ -1,2 +1,0 @@
-python train.py -n four_ours_intra --use_kpr --use_gn --head twostream-inv-naive-pt --label_in_use 0,3,4,10 --vnt_not_use_ft --num_epochs 3000 --log_freq 6 --version 2 --vnt_pooling mean \
-    --num_gpus 8 --noise_amp 0.05 --kpr_k 400 --cross_p 0

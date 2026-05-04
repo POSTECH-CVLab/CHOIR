@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "choir"
+version = "1.0.0"
+description = "Stable and Consistent Prediction of 3D Characteristic Orientation via Invariant Residual Learning"
+authors = [
+    {name = "Chunghyun Park"},
+    {name = "Jaesik Park"},
+    {name = "Minsu Cho"},
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "numpy",
+    "scipy",
+    "h5py",
+    "tqdm",
+    "lightning>=2.0",
+    "hydra-core>=1.3",
+    "hydra-colorlog>=1.2",
+    "torchmetrics",
+    "rootutils",
+    "rich",
+    "wandb",
+    "omegaconf",
+    "torch-cluster",
+]
+
+[project.urls]
+Homepage = "https://github.com/chrockey/CHOIR"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[[tool.uv.index]]
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+name = "pytorch-cu128"
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+
+[tool.uv.extra-build-dependencies]
+torch-cluster = ["torch"]
+
+[tool.black]
+line-length = 99

@@ -1,0 +1,21 @@
+_target_: src.data.shapenet.ShapeNetDataModule
+
+label_in_use: "0,3,4,10"
+num_points: 1024
+resample: false
+batch_size: 32
+num_workers: 8
+data_path: ${paths.data_dir}/shapenet
+
+train_transforms:
+  - _target_: src.data.transforms.PointSampling
+    num_points: 4096
+    sample_alg: random
+  - _target_: src.data.transforms.KnnPatchRemoval
+    k: 200
+    num_patches: 1
+  - _target_: src.data.transforms.GaussianNoise
+    noise_amp: 0.025
+  - _target_: src.data.transforms.PointSampling
+    num_points: 1024
+    sample_alg: random

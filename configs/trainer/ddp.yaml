@@ -1,0 +1,6 @@
+defaults:
+  - default
+
+devices: 8
+strategy: ddp
+sync_batchnorm: true

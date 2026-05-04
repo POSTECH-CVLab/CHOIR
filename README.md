@@ -1,42 +1,76 @@
-# Self-Supervised Learning of Canonical Orientation
+## `CHOIR`: `CH`aracteristic `O`rientation Predictor with `I`nvariant `R`esidual Learning
 
-### Quick Start
-Within a virtual environment (recommended), command as follows:
+> [Stable and Consistent Prediction of 3D Characteristic Orientation via Invariant Residual Learning](https://arxiv.org/abs/2306.07547)\
+> [Seungwook Kim<sup>1*</sup>](https://wookiekim.github.io/),
+> [Chunghyun Park<sup>1*</sup>](https://chrockey.github.io/),
+> [Jaesik Park<sup>2</sup>](http://jaesik.info/), and
+> [Minsu Cho<sup>1</sup>](http://cvlab.postech.ac.kr/~mcho/) (*equal contribution)<br>
+> <sup>1</sup>POSTECH and <sup>2</sup>Seoul National University<br>
+> ICML 2023, Honolulu.
+
+<div align="left">
+  <a href="https://arxiv.org/abs/2306.07547"><img src="https://img.shields.io/badge/arXiv-2306.07547-b31b1b.svg"/></a>
+</div>
+
+## Installation
+
 ```bash
-~$ conda create -n cores python=3.8 -y
-~$ conda activate cores
-(cores) ~$ pip install torch==1.12.1+cu113 --extra-index-url https://download.pytorch.org/whl/cu113
-(cores) ~$ pip install torch-cluster -f https://data.pyg.org/whl/torch-1.12.1+cu113.html
-(cores) ~$ pip install -r requirements-wo-pytorch3d.txt
-(cores) ~$ bash install_torch_batch_svd.sh # optional (condor)
-~$ apt-get update && apt-get install libgl1 # optional
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
 ```
 
-All configurations for the experiment are described in `config.py`.
+> [!NOTE]
+> CUDA is required for `torch-cluster` (compiled from source during `uv sync`). Tested on Python 3.12, PyTorch 2.11, CUDA 12.8, 8 NVIDIA A6000 GPUs.
 
+## Data
 
-### Overview of the codebase
+ShapeNet point clouds are automatically downloaded and prepared on first run. To prepare manually:
 
-- Datasets
-  - ShapeNet
-    - [The preprocessed ShapeNetStabilityTest](https://postechackr-my.sharepoint.com/:u:/g/personal/p0125ch_postech_ac_kr/Eesr8Nh4RiFIl4rWPQgckaYBPJ9yGA4pAnNg2wtK31jVbw?e=uyO0Me)
-  - ModelNet40 (todo)
-  - ModelNet40-D (todo)
+```bash
+uv run python src/data/prepare.py
+```
 
-- SE(3)-equivariant backbones
-  - Vector-Neuron with Translation (VNT)
+This downloads ShapeNet from [AtlasNetV2](https://github.com/TheoDEPRELLE/AtlasNetV2), converts PLY to H5, and generates the stability evaluation set.
 
-- Heads
-  - Global average pooling
-  - Generalized mean pooling (GeM)
-  - ...
-  - Point Transformer + GeM + Concat-Fusion
+## Training
 
-- Metrics
-  - Stability
-  - Consistency
-  - Average of the stability and consistency
+```bash
+# Single-class (8 GPU DDP)
+uv run python src/train.py experiment=airplane
+uv run python src/train.py experiment=car
+uv run python src/train.py experiment=chair
+uv run python src/train.py experiment=table
 
+# Multi-class (airplane, car, chair, table)
+uv run python src/train.py experiment=multi
 
-### Misc
-Use `vis.ipynb` and `debug.ipynb` for visualization and debugging, respectively.
+# Override any config
+uv run python src/train.py experiment=airplane trainer.devices=1 data.batch_size=16
+```
+
+Checkpoints and logs are saved to `logs/`.
+
+## Evaluation
+
+```bash
+uv run python src/eval.py ckpt_path=logs/.../best.ckpt
+```
+
+Metrics reported: **consistency** (cross-instance angular std) and **stability** (within-instance angular std), per class and averaged.
+
+## Acknowledgments
+
+This project builds upon [VN-SPD](https://github.com/orenkatzir/VN-SPD) for the Vector Neuron Transformer backbone and [Canonical Capsules](https://github.com/canonical-capsules/canonical-capsules) for ShapeNet data processing. The codebase structure follows [lightning-hydra-template](https://github.com/ashleve/lightning-hydra-template).
+
+## Citation
+
+If you find our work useful, please consider citing:
+
+```bibtex
+@inproceedings{kim2023choir,
+  title={Stable and Consistent Prediction of 3D Characteristic Orientation via Invariant Residual Learning},
+  author={Kim, Seungwook and Park, Chunghyun and Park, Jaesik and Cho, Minsu},
+  booktitle={Proceedings of the International Conference on Machine Learning (ICML)},
+  year={2023}
+}
+```

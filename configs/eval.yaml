@@ -1,0 +1,15 @@
+defaults:
+  - _self_
+  - data: shapenet
+  - model: choir
+  - callbacks: default
+  - trainer: default
+  - paths: default
+
+seed: 0
+ckpt_path: ???
+
+hydra:
+  output_subdir: null
+  run:
+    dir: .

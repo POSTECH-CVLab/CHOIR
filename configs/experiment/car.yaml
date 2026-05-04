@@ -1,0 +1,15 @@
+# @package _global_
+
+# Single-class: car
+# Usage: uv run python src/train.py experiment=car
+
+defaults:
+  - override /data: shapenet
+  - override /model: choir
+  - override /trainer: ddp
+
+data:
+  label_in_use: "3"
+
+trainer:
+  max_epochs: 3000

@@ -1,0 +1,14 @@
+model_checkpoint:
+  _target_: lightning.pytorch.callbacks.ModelCheckpoint
+  monitor: val/average
+  mode: min
+  save_last: true
+  save_top_k: 1
+  filename: best
+
+lr_monitor:
+  _target_: lightning.pytorch.callbacks.LearningRateMonitor
+  logging_interval: epoch
+
+progress_bar:
+  _target_: lightning.pytorch.callbacks.TQDMProgressBar

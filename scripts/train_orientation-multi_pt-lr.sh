@@ -1,2 +1,0 @@
-python train.py -n rebuttal_pt-lr --num_gpus 2 --batch_size 128 --head pt --pt_num_blocks 4 --lr 0.0001 --vnt_pooling mean \
---label_in_use 0,3,4,10 --use_kpr --use_gn --vnt_not_use_ft --cross_p 1 --num_epochs 1000 --kpr_k 200

@@ -1,0 +1,19 @@
+defaults:
+  - _self_
+  - data: shapenet
+  - model: choir
+  - optim: adam
+  - scheduler: cosine
+  - callbacks: default
+  - logger: wandb
+  - trainer: default
+  - paths: default
+  - experiment: null
+
+seed: 0
+test_after_training: true
+
+hydra:
+  output_subdir: null
+  run:
+    dir: .

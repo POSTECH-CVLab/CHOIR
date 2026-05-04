@@ -1,0 +1,5 @@
+wandb:
+  _target_: lightning.pytorch.loggers.WandbLogger
+  project: choir
+  save_dir: ${paths.log_dir}
+  log_model: true

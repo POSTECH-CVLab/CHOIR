@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environments
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs & checkpoints
+logs/
+wandb/
+
+# Data (keep structure, ignore large files)
+data/shapenet/*.h5
+data/shapenet/*.npz

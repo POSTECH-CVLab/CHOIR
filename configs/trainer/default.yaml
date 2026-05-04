@@ -1,0 +1,10 @@
+_target_: lightning.pytorch.trainer.Trainer
+
+default_root_dir: ${paths.log_dir}
+max_epochs: 3000
+accelerator: gpu
+devices: 1
+log_every_n_steps: 6
+check_val_every_n_epoch: 10
+num_sanity_val_steps: 0
+precision: 32

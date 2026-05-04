@@ -1,0 +1,34 @@
+# @package _global_
+model:
+  _target_: src.models.lightning_modules.choir_module.CHOIRModule
+
+  optimizer: ${optim}
+  scheduler: ${scheduler}
+  scheduler_interval: epoch
+
+  net:
+    _target_: src.models.networks.choir.CHOIR
+    hypothesizer:
+      _target_: src.models.networks.hypothesizer.OrientationHypothesizer
+      encoder:
+        _target_: src.models.networks.encoder.EquivariantEncoder
+        k: 40
+        pooling: mean
+        base_ch: 64
+        nlatent: 1020
+        feature_transform: false
+        which_norm_VNT: norm
+      rotation_predictor:
+        _target_: src.models.networks.hypothesizer.EquivariantRotationPredictor
+        in_channels: 170  # nlatent // 6
+      invariant_feature_extractor:
+        _target_: src.models.networks.vn_layers.VNStdFeature
+        in_channels: 340  # (nlatent // 6) * 2
+        dim: 4
+        normalize_frame: false
+        negative_slope: 0.0
+    residual_predictor:
+      _target_: src.models.networks.residual_predictor.ResidualPredictor
+      in_channels: 340
+      mid_channels: 64
+      num_blocks: 4

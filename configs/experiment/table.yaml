@@ -1,0 +1,15 @@
+# @package _global_
+
+# Single-class: table
+# Usage: uv run python src/train.py experiment=table
+
+defaults:
+  - override /data: shapenet
+  - override /model: choir
+  - override /trainer: ddp
+
+data:
+  label_in_use: "10"
+
+trainer:
+  max_epochs: 3000
