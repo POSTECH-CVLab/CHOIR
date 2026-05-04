@@ -24,3 +24,4 @@ wandb/
 data/*.h5
 data/*.npz
 data/_raw/
+*.log
