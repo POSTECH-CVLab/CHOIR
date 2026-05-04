@@ -3,7 +3,7 @@ model:
   _target_: src.models.lightning_modules.choir_module.CHOIRModule
   optimizer: ${optim}
   scheduler: ${scheduler}
-  scheduler_interval: epoch
+  scheduler_interval: step
 
   net:
     _target_: src.models.networks.choir.CHOIR

@@ -8,7 +8,7 @@ model:
 
   optimizer: ${optim}
   scheduler: ${scheduler}
-  scheduler_interval: epoch
+  scheduler_interval: step
 
   net:
     _target_: src.models.networks.choir.CHOIR

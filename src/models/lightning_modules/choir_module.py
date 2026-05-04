@@ -27,7 +27,7 @@ class CHOIRModule(L.LightningModule):
         net: nn.Module,
         optimizer: DictConfig,
         scheduler: DictConfig | None = None,
-        scheduler_interval: str = "epoch",
+        scheduler_interval: str = "step",
     ):
         super().__init__()
         self.save_hyperparameters(ignore=["net", "optimizer", "scheduler"], logger=False)
@@ -59,10 +59,13 @@ class CHOIRModule(L.LightningModule):
         result: dict[str, Any] = {"optimizer": optimizer}
 
         if self.scheduler_cfg is not None:
+            total_steps = self.trainer.estimated_stepping_batches
             if callable(self.scheduler_cfg):
-                scheduler = self.scheduler_cfg(optimizer=optimizer)
+                scheduler = self.scheduler_cfg(optimizer=optimizer, total_steps=total_steps)
             else:
-                scheduler = hydra.utils.instantiate(self.scheduler_cfg, optimizer=optimizer)
+                scheduler = hydra.utils.instantiate(
+                    self.scheduler_cfg, optimizer=optimizer, total_steps=total_steps,
+                )
             result["lr_scheduler"] = {
                 "scheduler": scheduler,
                 "interval": self.hparams.scheduler_interval,

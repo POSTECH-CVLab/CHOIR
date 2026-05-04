@@ -1,6 +1,7 @@
 # @package _global_
 scheduler:
-  _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+  _target_: torch.optim.lr_scheduler.OneCycleLR
   _partial_: true
-  T_max: ${trainer.max_epochs}
-  eta_min: 0
+  max_lr: ${optim.lr}
+  pct_start: 0.01
+  anneal_strategy: "cos"

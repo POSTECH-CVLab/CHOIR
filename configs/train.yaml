@@ -1,5 +1,4 @@
 defaults:
-  - _self_
   - data: shapenet
   - model: choir
   - optim: adam
@@ -9,6 +8,8 @@ defaults:
   - trainer: default
   - paths: default
   - experiment: null
+  - override hydra/job_logging: none
+  - _self_
 
 seed: 0
 test_after_training: true
