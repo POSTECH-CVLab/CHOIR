@@ -1,6 +1,6 @@
 ### `CHOIR`: `CH`aracteristic `O`rientation Predictor with `I`nvariant `R`esidual Learning
 
-> [Stable and Consistent Prediction of 3D Characteristic Orientation via Invariant Residual Learning](https://arxiv.org/abs/2306.07547)\
+> [Stable and Consistent Prediction of 3D Characteristic Orientation via Invariant Residual Learning](https://arxiv.org/abs/2306.11406)\
 > [Seungwook Kim<sup>1*</sup>](https://wookiekim.github.io/),
 > [Chunghyun Park<sup>1*</sup>](https://chrockey.github.io/),
 > [Jaesik Park<sup>2</sup>](http://jaesik.info/), and
@@ -9,7 +9,7 @@
 > ICML 2023, Honolulu.
 
 <div align="left">
-  <a href="https://arxiv.org/abs/2306.07547"><img src="https://img.shields.io/badge/arXiv-2306.07547-b31b1b.svg"/></a>
+  <a href="https://arxiv.org/abs/2306.11406"><img src="https://img.shields.io/badge/arXiv-2306.11406-b31b1b.svg"/></a>
 </div>
 
 ## Installation
