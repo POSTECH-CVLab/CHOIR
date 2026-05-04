@@ -45,7 +45,9 @@ class CHOIRModule(L.LightningModule):
             self.val_cns_metrics = nn.ModuleList(
                 [CatMetric() for _ in range(num_classes)]
             )
-            self.val_stb_metric = MeanMetric()
+            self.val_stb_metrics = nn.ModuleList(
+                [MeanMetric() for _ in range(num_classes)]
+            )
 
     def forward(self, pcd: torch.Tensor) -> dict[str, torch.Tensor]:
         return self.net(pcd)
@@ -108,47 +110,41 @@ class CHOIRModule(L.LightningModule):
         output = self.net(batch["pcd"])
         batched_rots_can = torch.bmm(batch["rots"].transpose(1, 2), output["end_rots"])
         list_rots_can = batched_rots_can.chunk(batch["batch_size"], dim=0)
-        for rots_can in list_rots_can:
+        labels = batch["label"].tolist()
+        for label, rots_can in zip(labels, list_rots_can):
             std = angular_std(rots_can).item()
-            self.val_stb_metric.update(std)
+            self.val_stb_metrics[label].update(std)
 
-    def _compute_metrics(self) -> tuple[dict[str, torch.Tensor], torch.Tensor]:
-        cns_classwise = {}
-        for label_idx, metric in enumerate(self.val_cns_metrics):
-            rots = metric.compute()
-            std = angular_std(rots)
-            cns_classwise[self.label2name[label_idx]] = std
-            metric.reset()
+    def _compute_metrics(self) -> dict[str, dict[str, torch.Tensor]]:
+        """Returns {class_name: {"consistency": ..., "stability": ...}} per class."""
+        classwise = {}
+        for label_idx, (cns_metric, stb_metric) in enumerate(
+            zip(self.val_cns_metrics, self.val_stb_metrics)
+        ):
+            name = self.label2name[label_idx]
+            cns = angular_std(cns_metric.compute())
+            stb = stb_metric.compute()
+            classwise[name] = {"consistency": cns, "stability": stb}
+            cns_metric.reset()
+            stb_metric.reset()
+        return classwise
 
-        stb = self.val_stb_metric.compute()
-        self.val_stb_metric.reset()
+    def _log_metrics(self, prefix: str, classwise: dict) -> None:
+        log_dict = {}
+        avg_list = []
+        for name, metrics in classwise.items():
+            cns, stb = metrics["consistency"], metrics["stability"]
+            avg = (cns + stb) / 2
+            log_dict[f"{prefix}/{name}_cns"] = cns
+            log_dict[f"{prefix}/{name}_stb"] = stb
+            log_dict[f"{prefix}/{name}_avg"] = avg
+            avg_list.append(avg)
+        log_dict[f"{prefix}/avg"] = sum(avg_list) / len(avg_list)
 
-        return cns_classwise, stb
+        self.log_dict(log_dict, logger=True, sync_dist=(prefix == "val"))
 
     def on_validation_epoch_end(self) -> None:
-        cns_classwise, stb = self._compute_metrics()
-        cns = sum(cns_classwise.values()) / len(cns_classwise)
-
-        log_dict = {
-            "val/consistency": cns,
-            "val/stability": stb,
-            "val/average": (cns + stb) / 2,
-        }
-        for name, val in cns_classwise.items():
-            log_dict[f"val_consistency/{name}"] = val
-
-        self.log_dict(log_dict, logger=True, sync_dist=True)
+        self._log_metrics("val", self._compute_metrics())
 
     def on_test_epoch_end(self) -> None:
-        cns_classwise, stb = self._compute_metrics()
-        cns = sum(cns_classwise.values()) / len(cns_classwise)
-
-        log_dict = {
-            "test/consistency": cns,
-            "test/stability": stb,
-            "test/average": (cns + stb) / 2,
-        }
-        for name, val in cns_classwise.items():
-            log_dict[f"test_consistency/{name}"] = val
-
-        self.log_dict(log_dict, logger=True)
+        self._log_metrics("test", self._compute_metrics())

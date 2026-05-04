@@ -1,6 +1,6 @@
 model_checkpoint:
   _target_: lightning.pytorch.callbacks.ModelCheckpoint
-  monitor: val/average
+  monitor: val/avg
   mode: min
   save_last: true
   save_top_k: 1
