@@ -114,11 +114,13 @@ def download_shapenet(data_dir: str) -> str:
         Path to extracted customShapeNet directory.
     """
     import urllib.request
+    import time
 
     raw_dir = os.path.join(data_dir, "_raw")
     os.makedirs(raw_dir, exist_ok=True)
 
     zip_path = os.path.join(raw_dir, "customShapeNet.zip")
+    zip_part = zip_path + ".part"
     extract_dir = os.path.join(raw_dir, "customShapeNet")
 
     if os.path.isdir(extract_dir) and any(
@@ -129,19 +131,71 @@ def download_shapenet(data_dir: str) -> str:
 
     if not os.path.exists(zip_path):
         print(f"Downloading ShapeNet from {DOWNLOAD_URL} ...")
-        print("(This may take a while, ~2GB)")
+        print("(~12GB, supports resume on failure)")
 
-        def _progress(block_num, block_size, total_size):
-            downloaded = block_num * block_size
-            if total_size > 0:
-                pct = min(100, downloaded * 100 // total_size)
-                mb = downloaded / (1024 * 1024)
-                total_mb = total_size / (1024 * 1024)
-                sys.stdout.write(f"\r  {mb:.0f}/{total_mb:.0f} MB ({pct}%)")
-                sys.stdout.flush()
+        max_retries = 10
+        for attempt in range(1, max_retries + 1):
+            try:
+                # Resume from partial download
+                existing_size = os.path.getsize(zip_part) if os.path.exists(zip_part) else 0
 
-        urllib.request.urlretrieve(DOWNLOAD_URL, zip_path, reporthook=_progress)
-        print()
+                req = urllib.request.Request(DOWNLOAD_URL)
+                if existing_size > 0:
+                    req.add_header("Range", f"bytes={existing_size}-")
+                    print(f"  Resuming from {existing_size / (1024**2):.0f} MB (attempt {attempt}/{max_retries})")
+
+                resp = urllib.request.urlopen(req, timeout=60)
+
+                # Check if server supports range requests
+                content_range = resp.headers.get("Content-Range")
+                if existing_size > 0 and content_range is None:
+                    # Server doesn't support resume, restart
+                    existing_size = 0
+                    mode = "wb"
+                else:
+                    mode = "ab" if existing_size > 0 else "wb"
+
+                total_size = int(resp.headers.get("Content-Length", 0)) + existing_size
+                downloaded = existing_size
+
+                with open(zip_part, mode) as f:
+                    while True:
+                        chunk = resp.read(1024 * 1024)  # 1MB chunks
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        if total_size > 0:
+                            pct = min(100, downloaded * 100 // total_size)
+                            mb = downloaded / (1024**2)
+                            total_mb = total_size / (1024**2)
+                            sys.stdout.write(f"\r  {mb:.0f}/{total_mb:.0f} MB ({pct}%)")
+                            sys.stdout.flush()
+
+                print()
+
+                # Verify download completeness
+                final_size = os.path.getsize(zip_part)
+                if total_size > 0 and final_size < total_size:
+                    raise IOError(f"Incomplete download: {final_size}/{total_size} bytes")
+
+                # Rename to final path
+                os.rename(zip_part, zip_path)
+                print(f"  Download complete: {zip_path}")
+                break
+
+            except (urllib.error.URLError, IOError, TimeoutError, ConnectionError) as e:
+                print(f"\n  Attempt {attempt}/{max_retries} failed: {e}")
+                if attempt < max_retries:
+                    wait = min(30, 5 * attempt)
+                    print(f"  Retrying in {wait}s...")
+                    time.sleep(wait)
+                else:
+                    raise RuntimeError(
+                        f"Failed to download after {max_retries} attempts. "
+                        f"Partial file saved at {zip_part}. "
+                        f"Re-run to resume, or download manually from {DOWNLOAD_URL}"
+                    )
 
     # Extract
     print(f"Extracting to {raw_dir} ...")
