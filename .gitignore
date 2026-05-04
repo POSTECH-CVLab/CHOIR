@@ -21,5 +21,6 @@ logs/
 wandb/
 
 # Data (keep structure, ignore large files)
-data/shapenet/*.h5
-data/shapenet/*.npz
+data/*.h5
+data/*.npz
+data/_raw/

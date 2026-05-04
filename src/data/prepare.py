@@ -3,7 +3,7 @@
 Downloads ShapeNet point clouds from AtlasNetV2, converts PLY to H5, and
 generates the stability test NPZ. Run once before training:
 
-    uv run python src/data/prepare.py [--data_dir data/shapenet]
+    uv run python src/data/prepare.py [--data_dir data]
 
 Pipeline:
   1. Download ShapeNet PLY files from AtlasNetV2 (cloud.enpc.fr)
@@ -329,7 +329,7 @@ def generate_stability_npz(
 def main():
     parser = argparse.ArgumentParser(description="Prepare ShapeNet data for CHOIR")
     parser.add_argument(
-        "--data_dir", type=str, default="data/shapenet",
+        "--data_dir", type=str, default="data",
         help="Output directory for processed data",
     )
     parser.add_argument(

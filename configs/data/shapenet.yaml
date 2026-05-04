@@ -5,7 +5,7 @@ num_points: 1024
 resample: false
 batch_size: 32
 num_workers: 8
-data_path: ${paths.data_dir}/shapenet
+data_path: ${paths.data_dir}
 
 train_transforms:
   - _target_: src.data.transforms.PointSampling

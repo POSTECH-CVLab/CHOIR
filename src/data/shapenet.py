@@ -85,7 +85,7 @@ class ShapeNetDataModule(L.LightningDataModule):
         resample: bool = False,
         batch_size: int = 32,
         num_workers: int = 8,
-        data_path: str = "data/shapenet",
+        data_path: str = "data",
         train_transforms: list[DictConfig] | None = None,
     ):
         super().__init__()
