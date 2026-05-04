@@ -272,7 +272,7 @@ def generate_stability_npz(
 ) -> None:
     """Generate stability evaluation NPZ with fixed random rotations."""
     npz_path = os.path.join(
-        data_dir, f"preprocessed_stability_c=0-3-4-10_n={num_points}.npz"
+        data_dir, "preprocessed_stability_spectral.npz"
     )
     if os.path.exists(npz_path):
         print(f"\nStability NPZ already exists: {npz_path}")

@@ -118,7 +118,7 @@ class ShapeNetDataModule(L.LightningDataModule):
             convert_ply_to_h5(ply_dir, hp.data_path)
 
         # Check stability npz
-        npz_path = os.path.join(hp.data_path, "preprocessed_stability_c=0-3-4-10_n=10000.npz")
+        npz_path = os.path.join(hp.data_path, "preprocessed_stability_spectral.npz")
         if not os.path.exists(npz_path):
             generate_stability_npz(hp.data_path)
 
@@ -290,7 +290,7 @@ class ShapeNetStabilityTest(Dataset):
         data_path: str,
     ):
         super().__init__()
-        fpath = os.path.join(data_path, "preprocessed_stability_c=0-3-4-10_n=10000.npz")
+        fpath = os.path.join(data_path, "preprocessed_stability_spectral.npz")
         test_data = np.load(fpath)
 
         self.rotated_pcd = test_data["rotated_pcd"]
