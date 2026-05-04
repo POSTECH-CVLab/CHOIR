@@ -3,3 +3,4 @@ wandb:
   project: CHOIR
   save_dir: ${paths.log_dir}
   log_model: true
+  tags: ${tags}
